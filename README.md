@@ -1,4 +1,4 @@
-pu.in.content
-=============
+pu.intranet.content
+===============
 
-Python United Intranet Content module
+PythonUnited Intranet Content module
