@@ -39,12 +39,19 @@ pu_in.content.remove_inline = function(tgt) {
  */
 pu_in.content.edit_inline = function(tgt) {
 
-  var editable = tgt.parents(".editable").eq(0);
+  var editable = null;
+  
+  if (tgt.attr("target")) {
+    editable = $(tgt.attr("target"));
+  } else {
+    editable = tgt.parents(".editable").eq(0);
+  }
 
   if (tgt.attr("href").startsWith("#")) {
     $(tgt.attr("href")).show();
   } else {
     $.get(tgt.attr("href"), function(data) {
+
         $("#MyModal .modal-body").html(data['html']);
         $("#MyModal").modal();
 
@@ -56,7 +63,7 @@ pu_in.content.edit_inline = function(tgt) {
       });
   }
 
-  tgt.parents(".editable").addClass("edit");
+  editable.addClass("edit");
 };
 
 

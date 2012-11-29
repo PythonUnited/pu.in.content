@@ -71,7 +71,15 @@ class JSONUpdateView(JSONResponseMixin, BaseUpdateView):
 
         if self.request.method == "GET":
             context['action'] = self.request.path
-            data = {'html': render_to_string("snippets/addform.html", context)}
+            if "field" in self.request.GET.keys():
+                context['field'] = \
+                    context['form'][self.request.GET['field']]
+                data = {'html': 
+                        render_to_string("snippets/singlefieldform.html", 
+                                         context)}
+            else:
+                data = {'html': render_to_string("snippets/addform.html", 
+                                                 context)}
         else:
             data = {'status': 0, 'errors': {}, 'html': ""}
 
@@ -79,11 +87,16 @@ class JSONUpdateView(JSONResponseMixin, BaseUpdateView):
                 data['status'] = -1
                 data['errors'] = context['form'].errors
                 context['action'] = self.request.path
-                data['html'] = render_to_string("snippets/addform.html", context)
-            elif self.get_html_template_name():
-                data['html'] = render_to_string(
-                    self.get_html_template_name(), context)
-            
+                data['html'] = render_to_string("snippets/addform.html", 
+                                                context)
+            else:
+
+                if self.get_html_template_name():
+                    data['html'] = render_to_string(
+                        self.get_html_template_name(), context)
+                elif "field" in self.request.POST.keys():
+                    data['html'] = context['form'].cleaned_data[self.request.POST['field']]
+
         return json.dumps(data)
 
 
