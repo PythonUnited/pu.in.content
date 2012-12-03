@@ -40,9 +40,11 @@ pu_in.content.remove_inline = function(tgt) {
 pu_in.content.edit_inline = function(tgt) {
 
   var editable = null;
-  
+  var replace = true;
+
   if (tgt.attr("target")) {
     editable = $(tgt.attr("target"));
+    replace = false;
   } else {
     editable = tgt.parents(".editable").eq(0);
   }
@@ -58,7 +60,7 @@ pu_in.content.edit_inline = function(tgt) {
         var form = $("#MyModal").find('form').eq(0);
 
         form.submit(function() {
-            return pu_in.content._handle_edit_submit(form, editable);
+            return pu_in.content._handle_edit_submit(form, editable, replace);
           })
       });
   }
@@ -123,7 +125,7 @@ pu_in.content._handle_add_submit = function(form, add_to) {
  * @param form Form to submit
  * @param replace Element to replace
  */
-pu_in.content._handle_edit_submit = function(form, replace) {
+pu_in.content._handle_edit_submit = function(form, target, replace) {
 
   $.post(form.attr("action"),
          form.serialize(),
@@ -132,10 +134,15 @@ pu_in.content._handle_edit_submit = function(form, replace) {
              $("#MyModal .modal-body").html(data['html']);
              var form = $("#MyModal").find('form').eq(0);
              form.submit(function() {
-                 return pu_in.content._handle_edit_submit(form, replace);
+                 return pu_in.content._handle_edit_submit(form, target, 
+                                                          replace);
                });
            } else {
-             replace.replaceWith(data['html']);
+             if (replace) {
+               target.replaceWith(data['html']);
+             } else {
+               target.html(data['html']);
+             }
              $("#MyModal").modal('hide');                       
            }
          });

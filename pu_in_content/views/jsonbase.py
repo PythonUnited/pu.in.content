@@ -1,49 +1,12 @@
-from django import http
-from django.utils import simplejson as json
+from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.views.generic.detail import BaseDetailView
 from django.views.generic.edit import BaseCreateView, BaseUpdateView, \
      BaseDeleteView
+from pu_in_core.views.jsonbase import JSONResponseMixin, JSONFormMixin
 
 
-class JSONResponseMixin(object):
-
-    def get_html_template_name(self):
-
-        """ Override this so as to return an actual html
-        template. This will be added to the JSON data under the key of
-        'html'.
-        """
-
-        return None
-
-    def render_to_response(self, context):
-        
-        "Returns a JSON response containing 'context' as payload"
-
-        return self.get_json_response(self.convert_context_to_json(context))
-
-    def get_json_response(self, content, **httpresponse_kwargs):
-
-        "Construct an `HttpResponse` object."
-
-        return http.HttpResponse(content,
-                                 content_type='application/json',
-                                 **httpresponse_kwargs)
-
-    def convert_context_to_json(self, context):
-
-        "Convert the context dictionary into a JSON object. Override per view"
-
-        raise NotImplementedError
-
-
-class JSONUpdateView(JSONResponseMixin, BaseUpdateView):
-
-    def form_valid(self, form):
-
-        self.object = form.save()
-        return self.render_to_response(self.get_context_data(form=form))
+class JSONUpdateView(JSONFormMixin, BaseUpdateView):
 
     def get_form(self, form_class):
 
@@ -52,7 +15,7 @@ class JSONUpdateView(JSONResponseMixin, BaseUpdateView):
         allow single field updates.
         """
 
-        data = http.QueryDict("", mutable=True)
+        data = QueryDict("", mutable=True)
 
         self.object = self.get_object()
 
@@ -67,69 +30,55 @@ class JSONUpdateView(JSONResponseMixin, BaseUpdateView):
 
         return form_class(data=data, instance=self.object)
 
-    def convert_context_to_json(self, context):
+    @property
+    def template_name(self):
 
-        if self.request.method == "GET":
-            context['action'] = self.request.path
-            if "field" in self.request.GET.keys():
-                context['field'] = \
-                    context['form'][self.request.GET['field']]
-                data = {'html': 
-                        render_to_string("snippets/singlefieldform.html", 
-                                         context)}
-            else:
-                data = {'html': render_to_string("snippets/addform.html", 
-                                                 context)}
+        if "field" in self.request.REQUEST.keys():
+            return "snippets/singlefieldform.html"
         else:
-            data = {'status': 0, 'errors': {}, 'html': ""}
+            return "snippets/editform.html"
+
+    def get_context_data(self, **kwargs):
+
+        context = super(JSONUpdateView, self).get_context_data(**kwargs)
+
+        if "field" in self.request.REQUEST.keys():
+
+            context['field'] = context['form'][self.request.REQUEST['field']]
+
+        if not context['form'].is_valid():
+            context['status'] = -1
+            context['errors'] = context['form'].errors
+        else:
+            context['status'] = 0
+            context['errors'] = ""
+
+        return context
+
+
+class JSONCreateView(JSONFormMixin, BaseCreateView): 
+
+    template_name = "snippets/addform.html"
+
+    def get_context_data(self, **kwargs):
+
+        context = super(JSONCreateView, self).get_context_data(**kwargs)
+
+        if self.request.method == "POST":
 
             if not context['form'].is_valid():
-                data['status'] = -1
-                data['errors'] = context['form'].errors
-                context['action'] = self.request.path
-                data['html'] = render_to_string("snippets/addform.html", 
-                                                context)
+                context['status'] = -1
+                context['errors'] = context['form'].errors
             else:
+                context['status'] = 0
+                context['errors'] = ""
 
-                if self.get_html_template_name():
-                    data['html'] = render_to_string(
-                        self.get_html_template_name(), context)
-                elif "field" in self.request.POST.keys():
-                    data['html'] = context['form'].cleaned_data[self.request.POST['field']]
-
-        return json.dumps(data)
-
-
-class JSONCreateView(JSONResponseMixin, BaseCreateView): 
-
-    def form_valid(self, form):
-
-        self.object = form.save()
-        return self.render_to_response(self.get_context_data(form=form))
-
-    def convert_context_to_json(self, context):
-
-        if self.request.method == "GET":
-            context['action'] = self.request.path
-            data = {'html': render_to_string("snippets/editform.html", context)}
-        else:
-            data = {'status': 0, 'errors': {}, 'html': ""}
-
-            if not context['form'].is_valid():
-                data['status'] = -1
-                data['errors'] = context['form'].errors
-                context['action'] = self.request.path
-                data['html'] = render_to_string("snippets/editform.html", context)
-            elif self.get_html_template_name():
-                data['html'] = render_to_string(
-                    self.get_html_template_name(), context)
-
-        return json.dumps(data)
+        return context
 
 
 class JSONDetailView(JSONResponseMixin, BaseDetailView):
 
-    def convert_context_to_json(self, context):
+    def get_context_data(self, **kwargs):
 
         data = {}
         
@@ -137,24 +86,14 @@ class JSONDetailView(JSONResponseMixin, BaseDetailView):
             data[field.name] = \
                    field.value_from_object(self.object)
 
-        if self.get_html_template_name():
-            data['html'] = render_to_string(
-                self.get_html_template_name(), context)
-
-        return json.dumps(data)
+        return data
 
 
 class JSONDeleteView(JSONResponseMixin, BaseDeleteView):
 
-    def convert_context_to_json(self, context):
+    def get_context_data(self, **kwargs):
 
-        data = {'status': 0, 'errors': {}}
-
-        if self.get_html_template_name():
-            data['html'] = render_to_string(
-                self.get_html_template_name(), context)
-
-        return json.dumps(data)
+        return {'status': 0, 'errors': {}}
 
     def post(self, *args, **kwargs):
 
