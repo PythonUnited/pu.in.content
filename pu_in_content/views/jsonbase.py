@@ -4,6 +4,8 @@ from django.views.generic.detail import BaseDetailView
 from django.views.generic.edit import BaseCreateView, BaseUpdateView, \
      BaseDeleteView
 from pu_in_core.views.jsonbase import JSONResponseMixin, JSONFormMixin
+from pu_in_content.utils import value_to_html
+from django.utils.safestring import mark_safe
 
 
 class JSONUpdateView(JSONFormMixin, BaseUpdateView):
@@ -45,6 +47,7 @@ class JSONUpdateView(JSONFormMixin, BaseUpdateView):
         if "field" in self.request.REQUEST.keys():
 
             context['field'] = context['form'][self.request.REQUEST['field']]
+            context['field_value'] = mark_safe(value_to_html(context['field']))
 
         if not context['form'].is_valid():
             context['status'] = -1

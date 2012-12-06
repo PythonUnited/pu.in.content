@@ -76,19 +76,27 @@ pu_in.content.edit_inline = function(tgt) {
  */
 pu_in.content.add_inline = function(tgt) {
 
-  var add_to = $(tgt.attr("target"));
+  var add_to = tgt.attr("target") ? $(tgt.attr("target")) : null;
 
   if (tgt.attr("href").startsWith("#")) {
     $(tgt.attr("href")).show();
   } else {
     $.get(tgt.attr("href"), function(data) {
-        $("#MyModal .modal-body").html(data['html']);
-        $("#MyModal").modal();
-        var form = $("#MyModal").find('form').eq(0);
 
-        form.submit(function() {
-            return pu_in.content._handle_add_submit(form, add_to);
-          })
+        // todo : propert content type check
+        
+        $("#MyModal .modal-body").html(data['html']);
+        $("#MyModal").modal('show');
+
+        try {
+          var form = $("#MyModal").find('form').eq(0);
+
+          form.submit(function() {
+              return pu_in.content._handle_add_submit(form, add_to);
+            });
+        } catch (e) {
+          // looks like no form... no problem.
+        }
       });
   }
 };
@@ -111,7 +119,11 @@ pu_in.content._handle_add_submit = function(form, add_to) {
                  return pu_in.content._handle_add_submit(form, add_to);
                });
            } else {
-             add_to.append(data['html']);
+             try {
+               add_to.append(data['html']);
+             } catch(e) {
+               // Hmm, maybe we didn't have a target?
+             }
              $("#MyModal").modal('hide');                       
            }
          });
