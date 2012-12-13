@@ -176,7 +176,7 @@ $(document).ready(function() {
         }
 
         if (tgt.hasClass("rm-inline")) {
-          if (tgt.attr("pu-confirm") == "true") {
+          if (tgt.attr("pu:confirm-delete") == "true") {
             pg.confirmMessage("Weet je zeker dat je dit item wilt verwijderen?", 
                               pu_in.content.remove_inline, [tgt]);
           } else {
