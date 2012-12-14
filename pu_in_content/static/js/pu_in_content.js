@@ -52,9 +52,15 @@ pu_in.content.edit_inline = function(tgt) {
   if (tgt.attr("href").startsWith("#")) {
     $(tgt.attr("href")).show();
   } else {
-    $.get(tgt.attr("href"), function(data) {
+    $.get(tgt.attr("href"), function(data, status, xhr) {
 
-        $("#MyModal .modal-body").html(data['html']);
+        var contentType = pu_in.core.detectContentType(xhr);
+
+        if (contentType.indexOf("json") > -1) {          
+          $("#MyModal .modal-body").html(data['html']);
+        } else {
+          $("#MyModal .modal-body").html(data);
+        }
         $("#MyModal").modal();
 
         var form = $("#MyModal").find('form').eq(0);
@@ -92,7 +98,7 @@ pu_in.content.add_inline = function(tgt) {
           var form = $("#MyModal").find('form').eq(0);
 
           form.submit(function() {
-              return pu_in.content._handle_add_submit(form, add_to);
+              return pu_in.content._handle_add_submit(tgt, form, add_to);
             });
         } catch (e) {
           // looks like no form... no problem.
@@ -107,7 +113,7 @@ pu_in.content.add_inline = function(tgt) {
  * @param form Form to submit
  * @param add_to Element to add reult to
  */
-pu_in.content._handle_add_submit = function(form, add_to) {
+pu_in.content._handle_add_submit = function(link, form, add_to) {
 
   $.post(form.attr("action"),
          form.serialize(),
@@ -116,7 +122,7 @@ pu_in.content._handle_add_submit = function(form, add_to) {
              $("#MyModal .modal-body").html(data['html']);
              var form = $("#MyModal").find('form').eq(0);
              form.submit(function() {
-                 return pu_in.content._handle_add_submit(form, add_to);
+                 return pu_in.content._handle_add_submit(link, form, add_to);
                });
            } else {
              try {
@@ -124,7 +130,10 @@ pu_in.content._handle_add_submit = function(form, add_to) {
              } catch(e) {
                // Hmm, maybe we didn't have a target?
              }
-             $("#MyModal").modal('hide');                       
+
+             pu_in.core.handleCallback(link);
+             
+             $("#MyModal").modal('hide');
            }
          });
   
@@ -141,7 +150,7 @@ pu_in.content._handle_edit_submit = function(form, target, replace) {
 
   $.post(form.attr("action"),
          form.serialize(),
-         function(data) {
+         function(data, status, xhr) {
            if (data['status'] != 0) {
              $("#MyModal .modal-body").html(data['html']);
              var form = $("#MyModal").find('form').eq(0);
@@ -155,6 +164,7 @@ pu_in.content._handle_edit_submit = function(form, target, replace) {
              } else {
                target.html(data['html']);
              }
+
              $("#MyModal").modal('hide');                       
            }
          });
