@@ -117,7 +117,7 @@ pu_in.content._handle_add_submit = function(link, form, add_to) {
 
   $.post(form.attr("action"),
          form.serialize(),
-         function(data) {
+         function(data, status, xhr) {
            if (data['status'] != 0) {
              $("#MyModal .modal-body").html(data['html']);
              var form = $("#MyModal").find('form').eq(0);
@@ -125,14 +125,9 @@ pu_in.content._handle_add_submit = function(link, form, add_to) {
                  return pu_in.content._handle_add_submit(link, form, add_to);
                });
            } else {
-             try {
-               add_to.append(data['html']);
-             } catch(e) {
-               // Hmm, maybe we didn't have a target?
-             }
 
-             pu_in.core.handleCallback(link);
-             
+             pu_in.core.handleResult(link, add_to, data, status, xhr, {'target-behavior': 'append'});
+
              $("#MyModal").modal('hide');
            }
          });
