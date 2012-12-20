@@ -34,19 +34,19 @@ pu_in.content.remove_inline = function(tgt) {
 /**
  * Edit inline. If the href is a link to an id, show that id (assuming
  * it is the edit form), else fetch the link and show that in the
- * target.
+ * modal box.
  * @param tgt Target link.
  */
 pu_in.content.edit_inline = function(tgt) {
 
-  var editable = null;
-  var replace = true;
+  var target = null;
+  var defaults = {};
 
   if (tgt.attr("target")) {
-    editable = $(tgt.attr("target"));
-    replace = false;
+    target = $(tgt.attr("target"));
   } else {
-    editable = tgt.parents(".editable").eq(0);
+    target = tgt.parents(".editable").eq(0);
+    defaults['pu_targetbehavior'] = 'replace';
   }
 
   if (tgt.attr("href").startsWith("#")) {
@@ -61,13 +61,30 @@ pu_in.content.edit_inline = function(tgt) {
         } else {
           $("#MyModal .modal-body").html(data);
         }
+        
+        // Bind submit
+        $("#MyModal").on("submit.pu_in_content", "form", function(e) {
+
+            var form = $(e.target);
+
+            $.post(form.attr("action"),
+                   form.serialize(),
+                   function(data, status, xhr) {
+                     if (data['status'] != 0) {
+                       $("#MyModal .modal-body").html(data['html']);
+                     } else {
+                       pu_in.core.handleResult(tgt, target, data, status, xhr, 
+                                               defaults);
+                       $("#MyModal").off("submit.pu_in_content", "form");
+                       $("#MyModal").modal('hide');                       
+                     }
+                   });
+
+            e.preventDefault();
+            e.stopPropagation();
+          });
+
         $("#MyModal").modal();
-
-        var form = $("#MyModal").find('form').eq(0);
-
-        form.submit(function() {
-            return pu_in.content._handle_edit_submit(form, editable, replace);
-          })
       });
   }
 
@@ -82,7 +99,8 @@ pu_in.content.edit_inline = function(tgt) {
  */
 pu_in.content.add_inline = function(tgt) {
 
-  var add_to = tgt.attr("target") ? $(tgt.attr("target")) : null;
+  var target = tgt.attr("target") ? $(tgt.attr("target")) : null;
+  var defaults = {'pu_targetbehavior': 'append'};
 
   if (tgt.attr("href").startsWith("#")) {
     $(tgt.attr("href")).show();
@@ -92,20 +110,32 @@ pu_in.content.add_inline = function(tgt) {
         // todo : propert content type check
         
         $("#MyModal .modal-body").html(data['html']);
-        $("#MyModal").modal('show');
 
-        try {
-          var form = $("#MyModal").find('form').eq(0);
+        $("#MyModal").on("submit.pu_in_content", "form", function(e) {
 
-          form.submit(function() {
-              return pu_in.content._handle_add_submit(tgt, form, add_to);
-            });
-        } catch (e) {
-          // looks like no form... no problem.
-        }
+            var form = $(e.target);
+
+            $.post(form.attr("action"),
+                   form.serialize(),
+                   function(data, status, xhr) {
+                     if (data['status'] != 0) {
+                       $("#MyModal .modal-body").html(data['html']);
+                     } else {
+                       pu_in.core.handleResult(tgt, target, data, status, xhr, 
+                                               defaults);
+                       $("#MyModal").off("submit.pu_in_content", "form");
+                       $("#MyModal").modal('hide');
+                     }
+                   });
+
+            e.preventDefault();
+            e.stopPropagation();
+
+          });
+        $("#MyModal").modal('show');        
       });
   }
-};
+}
 
 
 /**
@@ -115,54 +145,6 @@ pu_in.content.add_inline = function(tgt) {
  */
 pu_in.content._handle_add_submit = function(link, form, add_to) {
 
-  $.post(form.attr("action"),
-         form.serialize(),
-         function(data, status, xhr) {
-           if (data['status'] != 0) {
-             $("#MyModal .modal-body").html(data['html']);
-             var form = $("#MyModal").find('form').eq(0);
-             form.submit(function() {
-                 return pu_in.content._handle_add_submit(link, form, add_to);
-               });
-           } else {
-
-             pu_in.core.handleResult(link, add_to, data, status, xhr, {'target-behavior': 'append'});
-
-             $("#MyModal").modal('hide');
-           }
-         });
-  
-  return false;
-};
-
-
-/**
- * Handle submission of the edit form. Rebind submit to self.
- * @param form Form to submit
- * @param replace Element to replace
- */
-pu_in.content._handle_edit_submit = function(form, target, replace) {
-
-  $.post(form.attr("action"),
-         form.serialize(),
-         function(data, status, xhr) {
-           if (data['status'] != 0) {
-             $("#MyModal .modal-body").html(data['html']);
-             var form = $("#MyModal").find('form').eq(0);
-             form.submit(function() {
-                 return pu_in.content._handle_edit_submit(form, target, 
-                                                          replace);
-               });
-           } else {
-             if (replace) {
-               target.replaceWith(data['html']);
-             } else {
-               target.html(data['html']);
-             }
-
-             $("#MyModal").modal('hide');                       
-           }
-         });
   
   return false;
 };
@@ -181,7 +163,7 @@ $(document).ready(function() {
         }
 
         if (tgt.hasClass("rm-inline")) {
-          if (tgt.attr("pu:confirm-delete") == "true") {
+          if (tgt.data("pu_confirmdelete") == "true") {
             pg.confirmMessage("Weet je zeker dat je dit item wilt verwijderen?", 
                               pu_in.content.remove_inline, [tgt]);
           } else {
