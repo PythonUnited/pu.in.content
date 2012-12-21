@@ -2,8 +2,10 @@ def convert_imageattachment(field):
 
     img = field.field.to_python(field.value())
 
-    return """<img src="%s"/>""" % img.get_profile_middle_url()
-
+    if img:
+        return """<img src="%s"/>""" % img.get_profile_middle_url()
+    else:
+        return ""
 
 def convert_nothing(field):
 
