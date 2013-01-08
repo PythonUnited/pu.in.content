@@ -163,8 +163,9 @@ $(document).ready(function() {
         }
 
         if (tgt.hasClass("rm-inline")) {
-          if (tgt.data("pu_confirmdelete") == "true") {
-            pg.confirmMessage("Weet je zeker dat je dit item wilt verwijderen?", 
+          if (tgt.data("pu_confirmdelete")) {
+            pg.confirmMessage("Weet je zeker dat je dit item wilt verwijderen?",
+
                               pu_in.content.remove_inline, [tgt]);
           } else {
             pu_in.content.remove_inline(tgt);
