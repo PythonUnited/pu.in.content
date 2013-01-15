@@ -19,13 +19,24 @@ pu_in['content'] = {};
  */
 pu_in.content.remove_inline = function(tgt) {
 
+  var callback = null;
+
+  if (tgt.data("pu_callback")) {
+    callback = eval(tgt.data("pu_callback"));
+  }
+
   $.post(tgt.attr("href"),
-         {},
+{},
          function(data) {           
            if (data['status'] != 0) {
              pg.showMessage(data['errors'], "error");
            } else {
              tgt.parents(".editable").eq(0).remove();
+             try {
+               callback();
+             } catch (e) {
+               // handle errors please!
+             }
            }
          });
 };
