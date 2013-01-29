@@ -83,8 +83,10 @@ class JSONDetailView(JSONResponseMixin, BaseDetailView):
 
     def get_context_data(self, **kwargs):
 
-        data = {}
+        data = super(JSONDetailView, self).get_context_data(**kwargs)
         
+        data['status'] = 0
+
         for field in self.object.__class__._meta.fields:
             data[field.name] = \
                    field.value_from_object(self.object)
