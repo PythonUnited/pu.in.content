@@ -21,7 +21,7 @@ class JSONUpdateView(JSONFormMixin, BaseUpdateView):
 
         self.object = self.get_object()
 
-        for field in form_class._meta.fields:
+        for field in form_class.base_fields.keys():
             try:
                 modelfield = self.object.__class__._meta.get_field(field)
                 data[field] = modelfield.value_from_object(self.object)
@@ -49,7 +49,7 @@ class JSONUpdateView(JSONFormMixin, BaseUpdateView):
             context['field'] = context['form'][self.request.REQUEST['field']]
             context['field_value'] = mark_safe(value_to_html(context['field']))
 
-        if not context['form'].is_valid():
+        if self.request.method == "POST" and not context['form'].is_valid():
             context['status'] = -1
             context['errors'] = context['form'].errors
         else:

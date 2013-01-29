@@ -1,6 +1,12 @@
 /**
  * pu.in content library. This library takes care of frontend content
  * editing.
+ * This JS enables inline add, remove and edit.
+ *
+ * Inline add
+ * ----------
+ * Add class 'add-inline' to your link tag.
+ *
  */
 
 // pu_in namespace
@@ -29,7 +35,7 @@ pu_in.content.remove_inline = function(tgt) {
 {},
          function(data) {           
            if (data['status'] != 0) {
-             pg.showMessage(data['errors'], "error");
+             pu_in.core.showMessage(data['errors'], "error");
            } else {
              tgt.parents(".editable").eq(0).remove();
              try {
@@ -98,8 +104,6 @@ pu_in.content.edit_inline = function(tgt) {
         $("#MyModal").modal();
       });
   }
-
-  editable.addClass("edit");
 };
 
 
@@ -152,11 +156,10 @@ pu_in.content.add_inline = function(tgt) {
 /**
  * Handle submission of the add form. Rebind submit to self.
  * @param form Form to submit
- * @param add_to Element to add reult to
+ * @param add_to Element to add result to
  */
 pu_in.content._handle_add_submit = function(link, form, add_to) {
 
-  
   return false;
 };
 
@@ -173,45 +176,46 @@ $(document).ready(function() {
           tgt = tgt.parents(".rm-inline");
         }
 
-        if (tgt.hasClass("rm-inline")) {
+        if (!tgt.hasClass("disabled")) {
           if (tgt.data("pu_confirmdelete")) {
-            pg.confirmMessage("Weet je zeker dat je dit item wilt verwijderen?",
-
-                              pu_in.content.remove_inline, [tgt]);
+            pu_in.core.confirmMessage("Weet je zeker dat je dit item wilt verwijderen?",
+                                      
+                                      pu_in.content.remove_inline, [tgt]);
           } else {
             pu_in.content.remove_inline(tgt);
           }
         }
+
         event.preventDefault();        
       });
 
     $(document).on("click", ".edit-inline", function(event) {
-        try {
-          var tgt = $(event.target);
 
-          if (!tgt.hasClass("edit-inline")) {
-            tgt = tgt.parents(".edit-inline");
-          }
+        var tgt = $(event.target);
 
-          pu_in.content.edit_inline(tgt);
-        } catch (e) {
-          // pass
+        if (!tgt.hasClass("edit-inline")) {
+          tgt = tgt.parents(".edit-inline");
         }
+
+        if (!tgt.hasClass("disabled")) {
+          pu_in.content.edit_inline(tgt);
+        }
+
         event.preventDefault();
       });
 
     $(document).on("click", ".add-inline", function(event) {
-        try {
-          var tgt = $(event.target);
 
-          if (!tgt.hasClass("add-inline")) {
-            tgt = tgt.parents(".add-inline");
-          }
+        var tgt = $(event.target);
 
-          pu_in.content.add_inline(tgt);
-        } catch (e) {
-          // pass
+        if (!tgt.hasClass("add-inline")) {
+          tgt = tgt.parents(".add-inline");
         }
+
+        if (!tgt.hasClass("disabled")) {
+          pu_in.content.add_inline(tgt);
+        }
+
         event.preventDefault();
       });
     
