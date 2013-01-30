@@ -14,6 +14,9 @@ if (pu_in == undefined) {
   var pu_in = {};
 }
 
+// Set to your modal id if need be.
+pu_in['settings'] = {modal_id: "#MyModal"};
+
 
 // Our own namespace
 pu_in['content'] = {};
@@ -74,13 +77,13 @@ pu_in.content.edit_inline = function(tgt) {
         var contentType = pu_in.core.detectContentType(xhr);
 
         if (contentType.indexOf("json") > -1) {          
-          $("#MyModal .modal-body").html(data['html']);
+          $(pu_in.settings.modal_id + " .modal-body").html(data['html']);
         } else {
-          $("#MyModal .modal-body").html(data);
+          $(pu_in.settings.modal_id + " .modal-body").html(data);
         }
         
         // Bind submit
-        $("#MyModal").on("submit.pu_in_content", "form", function(e) {
+        $(pu_in.settings.modal_id).on("submit.pu_in_content", "form", function(e) {
 
             var form = $(e.target);
 
@@ -88,12 +91,11 @@ pu_in.content.edit_inline = function(tgt) {
                    form.serialize(),
                    function(data, status, xhr) {
                      if (data['status'] != 0) {
-                       $("#MyModal .modal-body").html(data['html']);
+                       $(pu_in.settings.modal_id + " .modal-body").html(data['html']);
                      } else {
                        pu_in.core.handleResult(tgt, target, data, status, xhr, 
                                                defaults);
-                       $("#MyModal").off("submit.pu_in_content", "form");
-                       $("#MyModal").modal('hide');                       
+                       $(pu_in.settings.modal_id).modal('hide'); 
                      }
                    });
 
@@ -101,7 +103,7 @@ pu_in.content.edit_inline = function(tgt) {
             e.stopPropagation();
           });
 
-        $("#MyModal").modal();
+        $(pu_in.settings.modal_id).modal();
       });
   }
 };
@@ -124,9 +126,9 @@ pu_in.content.add_inline = function(tgt) {
 
         // todo : propert content type check
         
-        $("#MyModal .modal-body").html(data['html']);
+        $(pu_in.settings.modal_id + " .modal-body").html(data['html']);
 
-        $("#MyModal").on("submit.pu_in_content", "form", function(e) {
+        $(pu_in.settings.modal_id).on("submit.pu_in_content", "form", function(e) {
 
             var form = $(e.target);
 
@@ -134,12 +136,11 @@ pu_in.content.add_inline = function(tgt) {
                    form.serialize(),
                    function(data, status, xhr) {
                      if (data['status'] != 0) {
-                       $("#MyModal .modal-body").html(data['html']);
+                       $(pu_in.settings.modal_id + " .modal-body").html(data['html']);
                      } else {
                        pu_in.core.handleResult(tgt, target, data, status, xhr, 
                                                defaults);
-                       $("#MyModal").off("submit.pu_in_content", "form");
-                       $("#MyModal").modal('hide');
+                       $(pu_in.settings.modal_id).modal('hide');
                      }
                    });
 
@@ -147,7 +148,7 @@ pu_in.content.add_inline = function(tgt) {
             e.stopPropagation();
 
           });
-        $("#MyModal").modal('show');        
+        $(pu_in.settings.modal_id).modal('show');        
       });
   }
 }
@@ -218,5 +219,9 @@ $(document).ready(function() {
 
         event.preventDefault();
       });
-    
+
+    // Clean up bind after use
+    $(pu_in.settings.modal_id).on('hide', function () {
+        $(pu_in.settings.modal_id).off("submit.pu_in_content");
+      });
   });

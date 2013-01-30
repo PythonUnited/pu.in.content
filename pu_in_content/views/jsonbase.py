@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 from django.views.generic.detail import BaseDetailView
 from django.views.generic.edit import BaseCreateView, BaseUpdateView, \
      BaseDeleteView
+from django.forms.models import model_to_dict
 from pu_in_core.views.jsonbase import JSONResponseMixin, JSONFormMixin
 from pu_in_content.utils import value_to_html
 from django.utils.safestring import mark_safe
@@ -16,19 +17,18 @@ class JSONUpdateView(JSONFormMixin, BaseUpdateView):
         Return the form, existing data merged with POST, so as to
         allow single field updates.
         """
+        data = None
 
-        data = QueryDict("", mutable=True)
+        if self.request.method == "POST":
 
-        self.object = self.get_object()
+            data = QueryDict("", mutable=True)
 
-        for field in form_class.base_fields.keys():
-            try:
-                modelfield = self.object.__class__._meta.get_field(field)
-                data[field] = modelfield.value_from_object(self.object)
-            except:
-                pass
+            self.object = self.get_object()
 
-        data.update(self.request.POST)
+            data.update(model_to_dict(self.object))
+
+            for key in self.request.POST.keys():
+                data[key] = self.request.POST[key]
 
         return form_class(data=data, instance=self.object)
 
