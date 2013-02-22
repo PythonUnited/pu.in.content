@@ -7,7 +7,8 @@ README = open(os.path.join(here, 'README.md')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
-    'django'
+    'django',
+    'pu_in_core'
     ]
 
 setup(name='pu_in_content',

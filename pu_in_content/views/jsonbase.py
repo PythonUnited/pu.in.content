@@ -4,22 +4,25 @@ from django.views.generic.detail import BaseDetailView
 from django.views.generic.edit import BaseCreateView, BaseUpdateView, \
      BaseDeleteView
 from django.forms.models import model_to_dict
-from pu_in_core.views.jsonbase import JSONResponseMixin, JSONFormMixin
+from pu_in_core.views.jsonbase import JSONResponseMixin, JSONModelFormMixin
 from pu_in_content.utils import value_to_html
 from django.utils.safestring import mark_safe
 
 
-class JSONUpdateView(JSONFormMixin, BaseUpdateView):
+class JSONUpdateView(JSONModelFormMixin, BaseUpdateView):
 
-    def get_form(self, form_class):
+    def get_form_kwargs(self):
 
         """
-        Return the form, existing data merged with POST, so as to
-        allow single field updates.
+        Return the data merged with POST, so as to allow single field
+        updates.
         """
-        data = None
+
+        kwargs = super(JSONUpdateView, self).get_form_kwargs()
 
         if self.request.method == "POST":
+
+            del kwargs['data']
 
             data = QueryDict("", mutable=True)
 
@@ -30,7 +33,9 @@ class JSONUpdateView(JSONFormMixin, BaseUpdateView):
             for key in self.request.POST.keys():
                 data[key] = self.request.POST[key]
 
-        return form_class(data=data, instance=self.object)
+            kwargs.update({"data": data, "instance": self.object})
+
+        return kwargs
 
     @property
     def template_name(self):
@@ -59,7 +64,7 @@ class JSONUpdateView(JSONFormMixin, BaseUpdateView):
         return context
 
 
-class JSONCreateView(JSONFormMixin, BaseCreateView): 
+class JSONCreateView(JSONModelFormMixin, BaseCreateView): 
 
     template_name = "snippets/addform.html"
 

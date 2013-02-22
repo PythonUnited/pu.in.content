@@ -14,10 +14,6 @@ if (pu_in == undefined) {
   var pu_in = {};
 }
 
-// Set to your modal id if need be.
-pu_in['settings'] = {modal_id: "#MyModal"};
-
-
 // Our own namespace
 pu_in['content'] = {};
 
