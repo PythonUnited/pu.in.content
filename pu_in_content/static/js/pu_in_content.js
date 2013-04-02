@@ -77,7 +77,9 @@ pu_in.content.edit_inline = function(tgt) {
         } else {
           $(pu_in.settings.modal_id + " .modal-body").html(data);
         }
-        
+        $(document).triggerHandler("pu_in_content_load_modal", 
+                                   [$(pu_in.settings.modal_id)]);
+
         // Bind submit
         $(pu_in.settings.modal_id).on("submit.pu_in_content", "form", function(e) {
 
@@ -88,6 +90,8 @@ pu_in.content.edit_inline = function(tgt) {
                    function(data, status, xhr) {
                      if (data['status'] != 0) {
                        $(pu_in.settings.modal_id + " .modal-body").html(data['html']);
+                       $(document).triggerHandler("pu_in_content_load_modal", 
+                                                  [$(pu_in.settings.modal_id)]);
                      } else {
                        pu_in.core.handleResult(tgt, target, data, status, xhr, 
                                                defaults);
@@ -120,9 +124,11 @@ pu_in.content.add_inline = function(tgt) {
   } else {
     $.get(tgt.attr("href"), function(data) {
 
-        // todo : propert content type check
+        // todo : proper content type check
         
         $(pu_in.settings.modal_id + " .modal-body").html(data['html']);
+        $(document).triggerHandler("pu_in_content_load_modal", 
+                                   [$(pu_in.settings.modal_id)]);
 
         $(pu_in.settings.modal_id).on("submit.pu_in_content", "form", function(e) {
 
@@ -133,6 +139,8 @@ pu_in.content.add_inline = function(tgt) {
                    function(data, status, xhr) {
                      if (data['status'] != 0) {
                        $(pu_in.settings.modal_id + " .modal-body").html(data['html']);
+                       $(document).triggerHandler("pu_in_content_load_modal", 
+                                                  [$(pu_in.settings.modal_id)]);
                      } else {
                        pu_in.core.handleResult(tgt, target, data, status, xhr, 
                                                defaults);
@@ -147,6 +155,7 @@ pu_in.content.add_inline = function(tgt) {
         $(pu_in.settings.modal_id).modal('show');        
       });
   }
+  pu_in.core.handleCallback(tgt);
 }
 
 
