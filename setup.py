@@ -36,7 +36,7 @@ setup(name='pu_in_content',
       tests_require= requires,
       test_suite="pu-in-content",
       entry_points = """\
-      [pu.in.app]
+      [djinn.app]
       urls=pu_in_content:get_urls
       css=pu_in_content:get_css
       js=pu_in_content:get_js

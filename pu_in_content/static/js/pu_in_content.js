@@ -24,24 +24,16 @@ pu_in['content'] = {};
  */
 pu_in.content.remove_inline = function(tgt) {
 
-  var callback = null;
+  $.post(tgt.attr("href"), {},
+         function(data, status, xhr) {
 
-  if (tgt.data("pu_callback")) {
-    callback = eval(tgt.data("pu_callback"));
-  }
+           var dict = pu_in.core.requestAsDataDict(data, status, xhr);
 
-  $.post(tgt.attr("href"),
-{},
-         function(data) {           
-           if (data['status'] != 0) {
-             pu_in.core.showMessage(data['errors'], "error");
+           if (dict['status'] != 0) {
+             pu_in.core.showMessage(dict['errors'], "error");
            } else {
              tgt.parents(".editable").eq(0).remove();
-             try {
-               callback();
-             } catch (e) {
-               // handle errors please!
-             }
+             pu_in.core.handleCallback(tgt);
            }
          });
 };
@@ -70,13 +62,10 @@ pu_in.content.edit_inline = function(tgt) {
   } else {
     $.get(tgt.attr("href"), function(data, status, xhr) {
 
-        var contentType = pu_in.core.detectContentType(xhr);
+        var dict = pu_in.core.requestAsDataDict(data, status, xhr);
 
-        if (contentType.indexOf("json") > -1) {          
-          $(pu_in.settings.modal_id + " .modal-body").html(data['html']);
-        } else {
-          $(pu_in.settings.modal_id + " .modal-body").html(data);
-        }
+        $(pu_in.settings.modal_id + " .modal-body").html(dict['html']);
+
         $(document).triggerHandler("pu_in_content_load_modal", 
                                    [$(pu_in.settings.modal_id)]);
 
@@ -88,8 +77,11 @@ pu_in.content.edit_inline = function(tgt) {
             $.post(form.attr("action"),
                    form.serialize(),
                    function(data, status, xhr) {
-                     if (data['status'] != 0) {
-                       $(pu_in.settings.modal_id + " .modal-body").html(data['html']);
+
+                     var dict = pu_in.core.requestAsDataDict(data, status, xhr);
+
+                     if (dict['status'] != 0) {
+                       $(pu_in.settings.modal_id + " .modal-body").html(dict['html']);
                        $(document).triggerHandler("pu_in_content_load_modal", 
                                                   [$(pu_in.settings.modal_id)]);
                      } else {
@@ -122,11 +114,11 @@ pu_in.content.add_inline = function(tgt) {
   if (tgt.attr("href").startsWith("#")) {
     $(tgt.attr("href")).show();
   } else {
-    $.get(tgt.attr("href"), function(data) {
+    $.get(tgt.attr("href"), function(data, status, xhr) {
 
-        // todo : proper content type check
+        var dict = pu_in.core.requestAsDataDict(data, status, xhr);
         
-        $(pu_in.settings.modal_id + " .modal-body").html(data['html']);
+        $(pu_in.settings.modal_id + " .modal-body").html(dict['html']);
         $(document).triggerHandler("pu_in_content_load_modal", 
                                    [$(pu_in.settings.modal_id)]);
 
@@ -137,8 +129,11 @@ pu_in.content.add_inline = function(tgt) {
             $.post(form.attr("action"),
                    form.serialize(),
                    function(data, status, xhr) {
-                     if (data['status'] != 0) {
-                       $(pu_in.settings.modal_id + " .modal-body").html(data['html']);
+
+                     var dict = pu_in.core.requestAsDataDict(data, status, xhr);
+                     
+                     if (dict['status'] != 0) {
+                       $(pu_in.settings.modal_id + " .modal-body").html(dict['html']);
                        $(document).triggerHandler("pu_in_content_load_modal", 
                                                   [$(pu_in.settings.modal_id)]);
                      } else {

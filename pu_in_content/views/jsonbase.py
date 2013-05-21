@@ -33,6 +33,8 @@ class JSONUpdateView(JSONModelFormMixin, BaseUpdateView):
             for key in self.request.POST.keys():
                 data[key] = self.request.POST[key]
 
+            data['changed_by'] = self.request.user.id
+
             kwargs.update({"data": data, "instance": self.object})
 
         return kwargs
@@ -44,6 +46,12 @@ class JSONUpdateView(JSONModelFormMixin, BaseUpdateView):
             return "snippets/singlefieldform.html"
         else:
             return "snippets/editform.html"
+
+    @property
+    def success_template_name(self):
+
+         return "%s/snippets/%s.html" % (self.object.app_label, 
+                                         self.object.ct_name)
 
     def get_context_data(self, **kwargs):
 
@@ -67,6 +75,46 @@ class JSONUpdateView(JSONModelFormMixin, BaseUpdateView):
 class JSONCreateView(JSONModelFormMixin, BaseCreateView): 
 
     template_name = "snippets/addform.html"
+
+    def get_initial(self):
+
+        initial = super(JSONCreateView, self).get_initial()
+
+        initial.update({"creator": self.request.user.id,
+                        "changed_by": self.request.user.id,
+                        "owner": self.request.user.id})
+
+        return initial
+
+    def get_form_kwargs(self):
+
+        """ Allow for missing input values for owner, ... """
+
+        kwargs = super(JSONCreateView, self).get_form_kwargs()
+
+        if self.request.method == "POST":
+
+            del kwargs['data']
+
+            data = QueryDict("", mutable=True)
+
+            for key in self.request.POST.keys():
+                data[key] = self.request.POST[key]
+
+            if not data.has_key("owner"):
+                data["owner"] = "userprofile:%s" % self.request.user.id
+
+            data['changed_by'] = data["creator"] = self.request.user.id
+
+            kwargs.update({"data": data})
+
+        return kwargs
+
+    @property
+    def success_template_name(self):
+
+         return "%s/snippets/%s.html" % (self.object.app_label, 
+                                         self.object.ct_name)
 
     def get_context_data(self, **kwargs):
 
