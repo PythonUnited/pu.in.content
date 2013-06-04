@@ -32,8 +32,8 @@ pu_in.content.remove_inline = function(tgt) {
            if (dict['status'] != 0) {
              pu_in.core.showMessage(dict['errors'], "error");
            } else {
-             tgt.parents(".editable").eq(0).remove();
              pu_in.core.handleCallback(tgt);
+             tgt.parents(".editable").eq(0).remove();
            }
          });
 };
