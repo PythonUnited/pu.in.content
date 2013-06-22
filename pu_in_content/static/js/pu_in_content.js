@@ -150,7 +150,6 @@ pu_in.content.add_inline = function(tgt) {
         $(pu_in.settings.modal_id).modal('show');        
       });
   }
-  pu_in.core.handleCallback(tgt);
 }
 
 
