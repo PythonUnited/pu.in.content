@@ -12,11 +12,11 @@ requires = [
     ]
 
 setup(name='pu_in_content',
-      version="1.0.0a",
+      version="1.0.0",
       description='PythonUnited Intranet Content',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Framework :: Django",
         "Intended Audience :: Developers",
         "License :: Freely Distributable",
