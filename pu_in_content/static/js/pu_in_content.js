@@ -35,7 +35,8 @@ pu_in.content.remove_inline = function(tgt) {
              pu_in.core.handleCallback(tgt);
              tgt.parents(".editable").eq(0).remove();
            }
-         });
+         },
+         "json");
 };
 
 
@@ -89,14 +90,14 @@ pu_in.content.edit_inline = function(tgt) {
                                                defaults);
                        $(pu_in.settings.modal_id).modal('hide'); 
                      }
-                   });
+                   }, "json");
 
             e.preventDefault();
             e.stopPropagation();
           });
 
         $(pu_in.settings.modal_id).modal();
-      });
+      }, "text");
   }
 };
 
@@ -141,14 +142,14 @@ pu_in.content.add_inline = function(tgt) {
                                                defaults);
                        $(pu_in.settings.modal_id).modal('hide');
                      }
-                   });
+                   }, "json");
 
             e.preventDefault();
             e.stopPropagation();
 
           });
         $(pu_in.settings.modal_id).modal('show');        
-      });
+      }, "text");
   }
 }
 
