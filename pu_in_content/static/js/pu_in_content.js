@@ -29,7 +29,7 @@ pu_in.content.remove_inline = function(tgt) {
 
            var dict = pu_in.core.requestAsDataDict(data, status, xhr);
 
-           if (dict['status'] != 0) {
+           if (pu_in.core.checkStatus(xhr) < 0) {
              pu_in.core.showMessage(dict['errors'], "error");
            } else {
              pu_in.core.handleCallback(tgt);
@@ -50,6 +50,7 @@ pu_in.content.edit_inline = function(tgt) {
 
   var target = null;
   var defaults = {};
+  var datatype = tgt.data("pu_datatype") || "text";
 
   if (tgt.attr("target")) {
     target = $(tgt.attr("target"));
@@ -81,7 +82,7 @@ pu_in.content.edit_inline = function(tgt) {
 
                      var dict = pu_in.core.requestAsDataDict(data, status, xhr);
 
-                     if (dict['status'] != 0) {
+                     if (pu_in.core.checkStatus(xhr) < 0) {
                        $(pu_in.settings.modal_id + " .modal-body").html(dict['html']);
                        $(document).triggerHandler("pu_in_content_load_modal", 
                                                   [$(pu_in.settings.modal_id)]);
@@ -90,14 +91,14 @@ pu_in.content.edit_inline = function(tgt) {
                                                defaults);
                        $(pu_in.settings.modal_id).modal('hide'); 
                      }
-                   }, "json");
+                   }, datatype);
 
             e.preventDefault();
             e.stopPropagation();
           });
 
         $(pu_in.settings.modal_id).modal();
-      }, "text");
+      }, datatype);
   }
 };
 
@@ -111,6 +112,7 @@ pu_in.content.add_inline = function(tgt) {
 
   var target = tgt.attr("target") ? $(tgt.attr("target")) : null;
   var defaults = {'pu_targetbehavior': 'append'};
+  var datatype = tgt.data("pu_datatype") || "text";
 
   if (tgt.attr("href").startsWith("#")) {
     $(tgt.attr("href")).show();
@@ -133,7 +135,7 @@ pu_in.content.add_inline = function(tgt) {
 
                      var dict = pu_in.core.requestAsDataDict(data, status, xhr);
                      
-                     if (dict['status'] != 0) {
+                     if (pu_in.core.checkStatus(xhr) < 0) {
                        $(pu_in.settings.modal_id + " .modal-body").html(dict['html']);
                        $(document).triggerHandler("pu_in_content_load_modal", 
                                                   [$(pu_in.settings.modal_id)]);
@@ -142,14 +144,14 @@ pu_in.content.add_inline = function(tgt) {
                                                defaults);
                        $(pu_in.settings.modal_id).modal('hide');
                      }
-                   }, "json");
+                   }, datatype);
 
             e.preventDefault();
             e.stopPropagation();
 
           });
         $(pu_in.settings.modal_id).modal('show');        
-      }, "text");
+      }, datatype);
   }
 }
 
