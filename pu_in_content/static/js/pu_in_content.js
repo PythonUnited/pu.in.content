@@ -173,11 +173,7 @@ $(document).ready(function() {
 
     $(document).on("click", ".rm-inline", function(event) {
 
-        var tgt = $(event.target);
-
-        if (!tgt.hasClass("rm-inline")) {
-          tgt = tgt.parents(".rm-inline");
-        }
+        var tgt = $(event.currentTarget);
 
         if (!tgt.hasClass("disabled")) {
           if (tgt.data("pu_confirmdelete")) {
