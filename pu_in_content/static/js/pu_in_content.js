@@ -190,17 +190,15 @@ $(document).ready(function() {
 
     $(document).on("click", ".edit-inline", function(event) {
 
-        var tgt = $(event.target);
+        event.preventDefault();
 
-        if (!tgt.hasClass("edit-inline")) {
-          tgt = tgt.parents(".edit-inline");
-        }
+        var tgt = $(event.currentTarget);
+
+        console.log(tgt.attr("class"));
 
         if (!tgt.hasClass("disabled")) {
           pu_in.content.edit_inline(tgt);
         }
-
-        event.preventDefault();
       });
 
     $(document).on("click", ".add-inline", function(event) {
