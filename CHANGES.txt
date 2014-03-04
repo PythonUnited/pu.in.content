@@ -1,3 +1,7 @@
+1.0.1
+=====
+ * Better support for different content types
+
 1.0.0a
 ------
 * Initial release
