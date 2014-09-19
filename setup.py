@@ -12,7 +12,7 @@ requires = [
     ]
 
 setup(name='pu_in_content',
-      version="1.0.1",
+      version="1.0.2",
       description='PythonUnited Intranet Content',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[

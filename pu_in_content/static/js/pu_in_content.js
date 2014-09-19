@@ -194,8 +194,6 @@ $(document).ready(function() {
 
         var tgt = $(event.currentTarget);
 
-        console.log(tgt.attr("class"));
-
         if (!tgt.hasClass("disabled")) {
           pu_in.content.edit_inline(tgt);
         }
